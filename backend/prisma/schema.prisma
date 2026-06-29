@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AssetStatus {
+  AVAILABLE
+  RENTED
+  DAMAGED
+}
+
+enum TransactionStatus {
+  ONGOING
+  COMPLETED
+}
+
+model Asset {
+  id            Int           @id @default(autoincrement())
+  name          String
+  description   String?
+  stock         Int
+  rentalPrice   Int
+  status        AssetStatus   @default(AVAILABLE)
+  transactions  Transaction[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  address   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id                 Int                 @id @default(autoincrement())
+  invoiceNumber      String              @unique
+
+  customerName       String
+  customerPhone      String?
+  customerAddress    String?
+
+  assetId            Int
+  asset              Asset               @relation(fields: [assetId], references: [id])
+
+  // Relasi ke User
+  userId             Int
+  user               User                @relation(fields: [userId], references: [id])
+
+  quantity           Int                 @default(1)
+
+  startDate          DateTime
+  endDate            DateTime
+  actualReturnDate   DateTime?
+
+  totalCost          Int
+  shippingCost       Int                 @default(0)
+
+  lateFine           Int                 @default(0)
+  damageFine         Int                 @default(0)
+  grandTotal         Int?
+
+  paymentStatus      String?
+  paymentMethod      String?
+  paidAmount         Int?
+  paymentTime        DateTime?
+
+  transactionStatus  TransactionStatus   @default(ONGOING)
+
+  shipment           Shipment?
+
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model Shipment {
+  id                Int @id @default(autoincrement())
+
+  transactionId     Int @unique
+
+  trackingNumber    String @unique
+
+  courierName       String
+
+  recipientName     String
+  recipientPhone    String?
+
+  deliveryAddress   String
+
+  shippingCost      Int @default(0)
+
+  status            String
+
+  latitude          Float?
+  longitude         Float?
+
+  notes             String?
+
+transaction Transaction @relation(fields: [transactionId], references: [id])
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
