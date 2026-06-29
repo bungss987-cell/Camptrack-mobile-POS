@@ -7,10 +7,10 @@ class AppConfig {
   static String get baseUrl {
     switch (environment) {
       case Environment.development:
-        // Use 10.0.2.2 for Android emulator (maps to host localhost)
-        // Use localhost for iOS simulator
+        // Use localhost for Web/iOS simulator
+        // Use 10.0.2.2 for Android emulator
         // Use your machine IP for physical devices
-        return 'http://10.0.2.2:3000/api';
+        return 'http://localhost:3000/api';
       case Environment.staging:
         return 'https://staging-api.camptrack.id/api';
       case Environment.production:

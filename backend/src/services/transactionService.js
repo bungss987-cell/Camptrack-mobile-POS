@@ -6,6 +6,10 @@ const generateInvoiceNumber = () => {
   return `INV-${Date.now()}`;
 };
 
+const generateTrackingNumber = () => {
+  return `CT-${Date.now()}`;
+};
+
 const getAllTransactions = async () => {
   return await prisma.transaction.findMany({
     include: {
@@ -73,6 +77,7 @@ const createTransaction = async (data, userId) => {
       quantity +
     shippingCost;
 
+  // Create transaction
   const transaction =
     await prisma.transaction.create({
       data: {
@@ -101,6 +106,21 @@ const createTransaction = async (data, userId) => {
       },
     });
 
+  // Auto-create shipment for this transaction
+  await prisma.shipment.create({
+    data: {
+      transactionId: transaction.id,
+      trackingNumber: generateTrackingNumber(),
+      courierName: data.courierName || "JNE",
+      recipientName: data.customerName,
+      recipientPhone: data.customerPhone || null,
+      deliveryAddress: data.customerAddress || "-",
+      shippingCost: shippingCost,
+      status: "PENDING",
+    },
+  });
+
+  // Decrement asset stock
   await prisma.asset.update({
     where: {
       id: asset.id,
@@ -112,7 +132,16 @@ const createTransaction = async (data, userId) => {
     },
   });
 
-  return transaction;
+  // Return transaction with shipment included
+  const fullTransaction = await prisma.transaction.findUnique({
+    where: { id: transaction.id },
+    include: {
+      asset: true,
+      shipment: true,
+    },
+  });
+
+  return fullTransaction;
 };
 
 const processReturn = async (
