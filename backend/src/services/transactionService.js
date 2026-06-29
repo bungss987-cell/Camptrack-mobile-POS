@@ -34,7 +34,11 @@ const getTransactionById = async (id) => {
   return transaction;
 };
 
-const createTransaction = async (data) => {
+const createTransaction = async (data, userId) => {
+  if (!userId) {
+    throw new Error("User ID wajib disertakan");
+  }
+
   const asset = await prisma.asset.findUnique({
     where: {
       id: Number(data.assetId),
@@ -79,6 +83,7 @@ const createTransaction = async (data) => {
         customerAddress: data.customerAddress,
 
         assetId: Number(data.assetId),
+        userId: userId,
         quantity: quantity,
 
         startDate,

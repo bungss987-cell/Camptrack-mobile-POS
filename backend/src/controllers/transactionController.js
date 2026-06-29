@@ -32,9 +32,12 @@ const getTransactionById = async (req, res, next) => {
 
 const createTransaction = async (req, res, next) => {
   try {
+    const userId = req.user.userId;
+
     const transaction =
       await transactionService.createTransaction(
-        req.body
+        req.body,
+        userId
       );
 
     return res.status(201).json({

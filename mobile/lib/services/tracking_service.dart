@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
-import '../models/transaction.dart';
 
-class HistoryService {
-  static String get baseUrl => '${AppConfig.baseUrl}/transactions';
+class TrackingService {
+  static String get baseUrl => '${AppConfig.baseUrl}/shipment';
 
   String? _token;
 
@@ -17,18 +16,22 @@ class HistoryService {
         if (_token != null) "Authorization": "Bearer $_token",
       };
 
-  Future<List<TransactionModel>> getHistory() async {
+  Future<Map<String, dynamic>?> getShipmentByTracking(
+      String trackingNumber) async {
+    if (trackingNumber.isEmpty || trackingNumber == "-") {
+      return null;
+    }
+
     final response = await http.get(
-      Uri.parse(baseUrl),
+      Uri.parse('$baseUrl/$trackingNumber'),
       headers: _headers,
     ).timeout(AppConfig.connectionTimeout);
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
-      List data = body["data"];
-      return data.map((e) => TransactionModel.fromJson(e)).toList();
-    } else {
-      throw Exception("Gagal mengambil data riwayat");
+      return body["data"];
     }
+
+    return null;
   }
 }

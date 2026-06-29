@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { authenticate } = require("../middleware/authMiddleware");
 
 const {
   getAllTransactions,
@@ -8,6 +9,9 @@ const {
   processReturn,
   processPayment,
 } = require("../controllers/transactionController");
+
+// All transaction routes require authentication
+router.use(authenticate);
 
 router.get("/", getAllTransactions);
 router.get("/:id", getTransactionById);
