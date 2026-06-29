@@ -5,6 +5,7 @@ const { createServer } = require('http');
 const { initWebSocket } = require('./utils/websocket');
 const errorHandler = require('./middleware/errorHandler');
 
+const authRoutes        = require('./routes/authRoutes');
 const stockRoutes       = require('./routes/stockRoutes');
 const shipmentRoutes    = require('./routes/shipmentRoutes');
 const paymentRoutes     = require('./routes/paymentRoutes');
@@ -21,6 +22,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/api/auth',         authRoutes);
 app.use('/api/stock',        stockRoutes);
 app.use('/api/shipment',     shipmentRoutes);
 app.use('/api/payment',      paymentRoutes);
